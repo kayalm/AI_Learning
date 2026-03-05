@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Number Guessing Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 255, 255, 0.2);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00ff88 0%, #00ffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .header p {
+            color: #00ffff;
+            opacity: 0.8;
+        }
+
+        .scene {
+            display: none;
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        .scene.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Menu Scene */
+        .menu-buttons {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 15px 20px;
+            border: 2px solid #00ffff;
+            background: transparent;
+            color: #00ffff;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .btn:active {
+            transform: translateX(3px);
+        }
+
+        .btn-primary {
+            border-color: #ff006e;
+            color: #ff006e;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: rgba(255, 0, 110, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.5);
+        }
+
+        .btn-secondary {
+            border-color: #00d9ff;
+            color: #00d9ff;
+            width: 100%;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 217, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+        }
+
+        .btn-success {
+            border-color: #00ff88;
+            color: #00ff88;
+            width: 100%;
+        }
+
+        .btn-success:hover {
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .btn-small {
+            padding: 12px 15px;
+            font-size: 0.95em;
+            width: auto;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* Game Scene */
+        .game-info {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .game-info h2 {
+            color: #00ffff;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .attempts-display {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .attempt-counter {
+            background: rgba(255, 0, 110, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid #ff006e;
+            color: #ff006e;
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .time-display {
+            background: rgba(0, 255, 136, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            font-weight: bold;
+            margin: 5px;
+            font-size: 1.1em;
+        }
+
+        .hint-box {
+            background: rgba(255, 152, 0, 0.2);
+            border: 2px solid #ff9800;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            color: #ffb74d;
+            font-weight: bold;
+            animation: pulse 0.6s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .message-box {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-success {
+            background: rgba(0, 255, 136, 0.2);
+            border: 2px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .message-error {
+            background: rgba(255, 0, 110, 0.2);
+            border: 2px solid #ff006e;
+            color: #ff006e;
+        }
+
+        .message-low {
+            background: rgba(0, 217, 255, 0.2);
+            border: 2px solid #00d9ff;
+            color: #00d9ff;
+        }
+
+        .message-high {
+            background: rgba(255, 152, 0, 0.2);
+            border: 2px solid #ff9800;
+            color: #ffb74d;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .input-group input {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            border: 2px solid #00ffff;
+            background: rgba(0, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1.1em;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            background: rgba(0, 255, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .input-group button {
+            padding: 15px 30px;
+            border: 2px solid #00ff88;
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 140px;
+        }
+
+        .input-group button:hover {
+            background: rgba(0, 255, 136, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        /* Scores Scene */
+        .scores-container {
+            margin-top: 20px;
+        }
+
+        .score-section {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .score-section h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid rgba(0, 255, 136, 0.5);
+            padding-bottom: 10px;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .score-item:last-child {
+            border-bottom: none;
+        }
+
+        .score-item span:first-child {
+            font-weight: bold;
+        }
+
+        .no-scores {
+            text-align: center;
+            color: #00d9ff;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .clear-scores-btn {
+            background: rgba(255, 0, 110, 0.2);
+            border: 2px solid #ff006e;
+            color: #ff006e;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .clear-scores-btn:hover {
+            background: rgba(255, 0, 110, 0.4);
+            box-shadow: 0 0 15px rgba(255, 0, 110, 0.5);
+        }
+
+        /* Results Scene */
+        .result-card {
+            background: rgba(0, 255, 136, 0.15);
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.7);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .result-card h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+            color: #00ff88;
+        }
+
+        .result-card p {
+            font-size: 1.2em;
+            margin: 10px 0;
+            color: #00ffff;
+        }
+
+        .result-emoji {
+            font-size: 3em;
+            margin: 15px 0;
+        }
+
+        .difficulty-selector {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-btn {
+            padding: 15px;
+            border: 2px solid #00d9ff;
+            background: transparent;
+            color: #00d9ff;
+            font-size: 1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .difficulty-btn:hover {
+            background: rgba(0, 217, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.5);
+        }
+
+        .difficulty-btn.selected {
+            background: rgba(0, 217, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.7);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9em;
+            border-top: 1px solid rgba(0, 255, 255, 0.2);
+            padding-top: 20px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .input-group input,
+            .input-group button {
+                width: 100%;
+            }
+
+            .btn {
+                padding: 12px 15px;
+                font-size: 1em;
+            }
+
+            .result-card {
+                padding: 20px;
+            }
+
+            .result-card h2 {
+                font-size: 1.5em;
+            }
+
+            .result-emoji {
+                font-size: 2.5em;
+            }
+
+            .attempts-display {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Difficulty Colors */
+        .easy { color: #00ff88; }
+        .medium { color: #ffb74d; }
+        .hard { color: #ff006e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 NUMBER GUESSING GAME</h1>
+            <p>Guess the secret number and test your intuition!</p>
+        </div>
+
+        <!-- Menu Scene -->
+        <div id="menuScene" class="scene active">
+            <div class="menu-buttons">
+                <button class="btn btn-secondary" onclick="startGame('easy')">
+                    <span>1️⃣ Easy</span> <span style="float: right; font-size: 0.8em;">10 attempts</span>
+                </button>
+                <button class="btn btn-secondary" onclick="startGame('medium')">
+                    <span>2️⃣ Medium</span> <span style="float: right; font-size: 0.8em;">7 attempts</span>
+                </button>
+                <button class="btn btn-secondary" onclick="startGame('hard')">
+                    <span>3️⃣ Hard</span> <span style="float: right; font-size: 0.8em;">5 attempts</span>
+                </button>
+                <button class="btn btn-primary" onclick="startTwoPlayer()">
+                    <span>👥 Two-Player Mode</span>
+                </button>
+                <button class="btn btn-success" onclick="showScores()">
+                    <span>📊 View Scores</span>
+                </button>
+            </div>
+            <div class="footer">
+                <p>💾 Scores are automatically saved to your browser</p>
+            </div>
+        </div>
+
+        <!-- Game Scene -->
+        <div id="gameScene" class="scene">
+            <div class="game-info">
+                <h2 id="gameTitle">Guessing Game</h2>
+                <p id="gameDescription">I've picked a number between 1 and 100. Can you guess it?</p>
+                <div class="attempts-display">
+                    <div class="attempt-counter">
+                        Attempts: <span id="attemptsLeft">10</span>/<span id="maxAttempts">10</span>
+                    </div>
+                    <div class="time-display">
+                        ⏱️ <span id="timer">0.0</span>s
+                    </div>
+                </div>
+            </div>
+
+            <div id="messageContainer"></div>
+            <div id="hintContainer"></div>
+
+            <div class="input-group">
+                <input 
+                    type="number" 
+                    id="guessInput" 
+                    placeholder="Enter your guess (1-100)" 
+                    min="1" 
+                    max="100"
+                    onkeypress="if(event.key === 'Enter') submitGuess();"
+                >
+                <button onclick="submitGuess()">🎯 GUESS</button>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="backToMenu()">
+                ← Back to Menu
+            </button>
+        </div>
+
+        <!-- Two-Player Setup Scene -->
+        <div id="twoPlayerSetupScene" class="scene">
+            <h2 style="color: #00ffff; margin-bottom: 20px; text-align: center;">👥 TWO-PLAYER MODE</h2>
+            <p style="text-align: center; margin-bottom: 20px; color: #00d9ff;">Choose a difficulty level:</p>
+            
+            <div class="difficulty-selector">
+                <button class="difficulty-btn" onclick="selectDifficulty('easy')">
+                    1️⃣ Easy (10 attempts each)
+                </button>
+                <button class="difficulty-btn" onclick="selectDifficulty('medium')">
+                    2️⃣ Medium (7 attempts each)
+                </button>
+                <button class="difficulty-btn" onclick="selectDifficulty('hard')">
+                    3️⃣ Hard (5 attempts each)
+                </button>
+            </div>
+
+            <button class="btn btn-success" style="width: 100%; margin-bottom: 10px;" onclick="startTwoPlayerGame()">
+                ▶️ START GAME
+            </button>
+            <button class="btn btn-primary" style="width: 100%;" onclick="backToMenu()">
+                ← Back to Menu
+            </button>
+        </div>
+
+        <!-- Two-Player Game Scene -->
+        <div id="twoPlayerGameScene" class="scene">
+            <div class="game-info">
+                <h2 id="twoPlayerTitle">Two-Player Mode</h2>
+                <p id="currentPlayer" style="color: #ff006e; font-size: 1.2em; margin: 10px 0;">Player 1's Turn</p>
+                <div class="attempts-display">
+                    <div>
+                        <div class="attempt-counter">
+                            P1: <span id="p1Attempts">10</span>/<span id="maxAttemptsTP">10</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="attempt-counter" style="border-color: #00d9ff; color: #00d9ff;">
+                            P2: <span id="p2Attempts">10</span>/<span id="maxAttemptsTP2">10</span>
+                        </div>
+                    </div>
+                    <div class="time-display">
+                        ⏱️ <span id="timerTP">0.0</span>s
+                    </div>
+                </div>
+            </div>
+
+            <div id="messageContainerTP"></div>
+            <div id="hintContainerTP"></div>
+
+            <div class="input-group">
+                <input 
+                    type="number" 
+                    id="guessInputTP" 
+                    placeholder="Enter your guess (1-100)" 
+                    min="1" 
+                    max="100"
+                    onkeypress="if(event.key === 'Enter') submitTwoPlayerGuess();"
+                >
+                <button onclick="submitTwoPlayerGuess()">🎯 GUESS</button>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="backToMenu()">
+                ← Back to Menu
+            </button>
+        </div>
+
+        <!-- Scores Scene -->
+        <div id="scoresScene" class="scene">
+            <h2 style="color: #00ffff; margin-bottom: 20px; text-align: center;">📊 SCORES</h2>
+            
+            <div class="scores-container">
+                <div class="score-section">
+                    <h3>📈 Session Scores</h3>
+                    <div id="sessionScores" class="no-scores">No scores yet this session</div>
+                </div>
+
+                <div class="score-section">
+                    <h3>🏆 All-Time High Scores</h3>
+                    <div id="highScores">
+                        <div class="score-item">
+                            <span>🟢 Easy:</span>
+                            <span id="easyHigh">-</span>
+                        </div>
+                        <div class="score-item">
+                            <span>🟡 Medium:</span>
+                            <span id="mediumHigh">-</span>
+                        </div>
+                        <div class="score-item">
+                            <span>🔴 Hard:</span>
+                            <span id="hardHigh">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="clear-scores-btn" onclick="clearScores()">
+                    🗑️ Clear All High Scores
+                </button>
+            </div>
+
+            <button class="btn btn-success" style="width: 100%; margin-top: 20px;" onclick="backToMenu()">
+                ← Back to Menu
+            </button>
+        </div>
+
+        <!-- Result Scene -->
+        <div id="resultScene" class="scene">
+            <div id="resultContent"></div>
+            <button class="btn btn-success" style="width: 100%;" onclick="backToMenu()">
+                ← Back to Menu
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let currentDifficulty = null;
+        let secret = null;
+        let attempts = 0;
+        let maxAttempts = 10;
+        let startTime = 0;
+        let timerInterval = null;
+        let gameActive = true;
+
+        // Two-Player State
+        let selectedTPDifficulty = null;
+        let tpPlayers = {
+            1: { attempts: 0, maxAttempts: 10 },
+            2: { attempts: 0, maxAttempts: 10 }
+        };
+        let currentTPPlayer = 1;
+        let tpSecret = null;
+        let tpStartTime = 0;
+        let tpTimerInterval = null;
+
+        // Session Scores
+        let sessionScores = [];
+
+        // Initialize
+        function init() {
+            loadHighScores();
+            updateScoresDisplay();
+        }
+
+        // Scene Management
+        function showScene(sceneName) {
+            document.querySelectorAll('.scene').forEach(scene => {
+                scene.classList.remove('active');
+            });
+            document.getElementById(sceneName).classList.add('active');
+        }
+
+        function backToMenu() {
+            stopTimer();
+            stopTPTimer();
+            gameActive = false;
+            showScene('menuScene');
+        }
+
+        // Start Single Player Game
+        function startGame(difficulty) {
+            currentDifficulty = difficulty;
+            maxAttempts = { easy: 10, medium: 7, hard: 5 }[difficulty];
+            secret = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+            gameActive = true;
+            startTime = Date.now();
+            
+            document.getElementById('gameTitle').textContent = `${difficulty.toUpperCase()} Mode`;
+            document.getElementById('attemptsLeft').textContent = maxAttempts;
+            document.getElementById('maxAttempts').textContent = maxAttempts;
+            document.getElementById('messageContainer').innerHTML = '';
+            document.getElementById('hintContainer').innerHTML = '';
+            document.getElementById('guessInput').value = '';
+            document.getElementById('timer').textContent = '0.0';
+            
+            startTimer();
+            showScene('gameScene');
+            document.getElementById('guessInput').focus();
+        }
+
+        // Submit Guess
+        function submitGuess() {
+            if (!gameActive) return;
+            
+            const input = document.getElementById('guessInput');
+            const guess = parseInt(input.value);
+            
+            if (!guess || guess < 1 || guess > 100) {
+                showMessage('⚠️ Please enter a number between 1 and 100!', 'error');
+                return;
+            }
+            
+            attempts++;
+            document.getElementById('attemptsLeft').textContent = maxAttempts - attempts;
+            input.value = '';
+            
+            const diff = Math.abs(secret - guess);
+            const messageContainer = document.getElementById('messageContainer');
+            const hintContainer = document.getElementById('hintContainer');
+            
+            if (guess === secret) {
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                stopTimer();
+                gameActive = false;
+                
+                messageContainer.innerHTML = `<div class="message-box message-success">
+                    🎉 CORRECT! The number was ${secret}!
+                    <br>✅ You got it in ${attempts} attempt(s)!
+                </div>`;
+                
+                let message = '';
+                if (attempts === 1) {
+                    message = '🏆 INCREDIBLE! First try!!';
+                } else if (attempts <= 3) {
+                    message = '⭐ Amazing! Very few attempts!';
+                } else if (attempts <= 5) {
+                    message = '👍 Good job!';
+                } else {
+                    message = '😅 You made it, but try to do better!';
+                }
+                
+                messageContainer.innerHTML += `<div class="message-box message-success">${message}</div>`;
+                messageContainer.innerHTML += `<div class="message-box message-success">⏱️ Time: ${elapsed} seconds</div>`;
+                
+                // Save score
+                sessionScores.push({ difficulty: currentDifficulty, attempts, time: parseFloat(elapsed) });
+                saveScore(currentDifficulty, attempts, parseFloat(elapsed));
+                
+                setTimeout(() => showResult(true, attempts, elapsed), 1000);
+                
+            } else if (guess < secret) {
+                hintContainer.innerHTML = '';
+                if (diff > 30) {
+                    showMessage('📈 Too LOW! (way too low)', 'low');
+                } else if (diff > 10) {
+                    showMessage('📈 Too LOW! (getting warmer...)', 'low');
+                } else {
+                    showMessage('📈 Too LOW! (very close!)', 'low');
+                }
+                
+                // Show hint when 3 attempts left
+                if (maxAttempts - attempts === 3) {
+                    const isEven = secret % 2 === 0;
+                    hintContainer.innerHTML = `<div class="hint-box">
+                        💡 Hint: The number is ${isEven ? 'EVEN' : 'ODD'}
+                    </div>`;
+                }
+                
+            } else {
+                hintContainer.innerHTML = '';
+                if (diff > 30) {
+                    showMessage('📉 Too HIGH! (way too high)', 'high');
+                } else if (diff > 10) {
+                    showMessage('📉 Too HIGH! (getting warmer...)', 'high');
+                } else {
+                    showMessage('📉 Too HIGH! (very close!)', 'high');
+                }
+                
+                // Show hint when 3 attempts left
+                if (maxAttempts - attempts === 3) {
+                    const isEven = secret % 2 === 0;
+                    hintContainer.innerHTML = `<div class="hint-box">
+                        💡 Hint: The number is ${isEven ? 'EVEN' : 'ODD'}
+                    </div>`;
+                }
+            }
+            
+            // Check if game over
+            if (attempts >= maxAttempts && guess !== secret) {
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                stopTimer();
+                gameActive = false;
+                
+                messageContainer.innerHTML = `<div class="message-box message-error">
+                    💀 GAME OVER! The secret number was ${secret}.
+                    <br>Better luck next time!
+                    <br>⏱️ Time: ${elapsed} seconds
+                </div>`;
+                
+                setTimeout(() => showResult(false, null, elapsed), 1000);
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            const messageClass = `message-${type}`;
+            messageContainer.innerHTML = `<div class="message-box ${messageClass}">${text}</div>`;
+        }
+
+        // Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                document.getElementById('timer').textContent = elapsed;
+            }, 100);
+        }
+
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        // Result Screen
+        function showResult(won, attempts, time) {
+            const content = document.getElementById('resultContent');
+            
+            if (won) {
+                content.innerHTML = `
+                    <div class="result-card">
+                        <div class="result-emoji">🎉</div>
+                        <h2>YOU WIN!</h2>
+                        <p>Attempts: <strong>${attempts}</strong></p>
+                        <p>Time: <strong>${time}s</strong></p>
+                        <p>Difficulty: <strong class="difficulty">${currentDifficulty.toUpperCase()}</strong></p>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="result-card">
+                        <div class="result-emoji">😅</div>
+                        <h2>GAME OVER</h2>
+                        <p>Time: <strong>${time}s</strong></p>
+                        <p>Difficulty: <strong class="difficulty">${currentDifficulty.toUpperCase()}</strong></p>
+                        <p>Better luck next time!</p>
+                    </div>
+                `;
+            }
+            
+            showScene('resultScene');
+        }
+
+        // Two-Player Mode
+        function startTwoPlayer() {
+            showScene('twoPlayerSetupScene');
+        }
+
+        function selectDifficulty(difficulty) {
+            selectedTPDifficulty = difficulty;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        function startTwoPlayerGame() {
+            if (!selectedTPDifficulty) {
+                alert('Please select a difficulty!');
+                return;
+            }
+            
+            const maxAtt = { easy: 10, medium: 7, hard: 5 }[selectedTPDifficulty];
+            tpPlayers[1] = { attempts: 0, maxAttempts: maxAtt };
+            tpPlayers[2] = { attempts: 0, maxAttempts: maxAtt };
+            
+            tpSecret = Math.floor(Math.random() * 100) + 1;
+            currentTPPlayer = 1;
+            tpStartTime = Date.now();
+            
+            document.getElementById('twoPlayerTitle').textContent = `Two-Player ${selectedTPDifficulty.toUpperCase()} Mode`;
+            document.getElementById('maxAttemptsTP').textContent = maxAtt;
+            document.getElementById('maxAttemptsTP2').textContent = maxAtt;
+            document.getElementById('p1Attempts').textContent = '0';
+            document.getElementById('p2Attempts').textContent = '0';
+            document.getElementById('messageContainerTP').innerHTML = '';
+            document.getElementById('hintContainerTP').innerHTML = '';
+            document.getElementById('guessInputTP').value = '';
+            document.getElementById('timerTP').textContent = '0.0';
+            
+            startTPTimer();
+            showScene('twoPlayerGameScene');
+            document.getElementById('guessInputTP').focus();
+        }
+
+        function submitTwoPlayerGuess() {
+            const input = document.getElementById('guessInputTP');
+            const guess = parseInt(input.value);
+            
+            if (!guess || guess < 1 || guess > 100) {
+                showTPMessage('⚠️ Please enter a number between 1 and 100!', 'error');
+                return;
+            }
+            
+            tpPlayers[currentTPPlayer].attempts++;
+            input.value = '';
+            
+            const diff = Math.abs(tpSecret - guess);
+            const messageContainer = document.getElementById('messageContainerTP');
+            const hintContainer = document.getElementById('hintContainerTP');
+            
+            updateTPAttempts();
+            
+            if (guess === tpSecret) {
+                const elapsed = ((Date.now() - tpStartTime) / 1000).toFixed(1);
+                stopTPTimer();
+                
+                messageContainer.innerHTML = `<div class="message-box message-success">
+                    🎉 Player ${currentTPPlayer} WINS!
+                    <br>Guessed in ${tpPlayers[currentTPPlayer].attempts} attempt(s)!
+                    <br>⏱️ Time: ${elapsed}s
+                </div>`;
+                
+                sessionScores.push({ difficulty: `2P-${selectedTPDifficulty}`, attempts: tpPlayers[currentTPPlayer].attempts, time: parseFloat(elapsed) });
+                
+                setTimeout(() => {
+                    showTPResult(true, currentTPPlayer, tpPlayers[currentTPPlayer].attempts, elapsed);
+                }, 1500);
+                
+            } else if (guess < tpSecret) {
+                hintContainer.innerHTML = '';
+                if (diff > 30) {
+                    showTPMessage('📈 Too LOW! (way too low)', 'low');
+                } else if (diff > 10) {
+                    showTPMessage('📈 Too LOW! (getting warmer...)', 'low');
+                } else {
+                    showTPMessage('📈 Too LOW! (very close!)', 'low');
+                }
+                
+                if (tpPlayers[currentTPPlayer].maxAttempts - tpPlayers[currentTPPlayer].attempts === 3) {
+                    const isEven = tpSecret % 2 === 0;
+                    hintContainer.innerHTML = `<div class="hint-box">
+                        💡 The number is ${isEven ? 'EVEN' : 'ODD'}
+                    </div>`;
+                }
+                
+                switchTPPlayer();
+                
+            } else {
+                hintContainer.innerHTML = '';
+                if (diff > 30) {
+                    showTPMessage('📉 Too HIGH! (way too high)', 'high');
+                } else if (diff > 10) {
+                    showTPMessage('📉 Too HIGH! (getting warmer...)', 'high');
+                } else {
+                    showTPMessage('📉 Too HIGH! (very close!)', 'high');
+                }
+                
+                if (tpPlayers[currentTPPlayer].maxAttempts - tpPlayers[currentTPPlayer].attempts === 3) {
+                    const isEven = tpSecret % 2 === 0;
+                    hintContainer.innerHTML = `<div class="hint-box">
+                        💡 The number is ${isEven ? 'EVEN' : 'ODD'}
+                    </div>`;
+                }
+                
+                switchTPPlayer();
+            }
+            
+            // Check if both out of attempts
+            if (tpPlayers[1].attempts >= tpPlayers[1].maxAttempts && 
+                tpPlayers[2].attempts >= tpPlayers[2].maxAttempts) {
+                const elapsed = ((Date.now() - tpStartTime) / 1000).toFixed(1);
+                stopTPTimer();
+                
+                messageContainer.innerHTML = `<div class="message-box message-error">
+                    💀 GAME OVER! The secret number was ${tpSecret}.
+                    <br>Neither player guessed it!
+                </div>`;
+                
+                setTimeout(() => showTPResult(false, null, null, elapsed), 1500);
+            }
+        }
+
+        function switchTPPlayer() {
+            currentTPPlayer = currentTPPlayer === 1 ? 2 : 1;
+            
+            const playerColor = currentTPPlayer === 1 ? '#ff006e' : '#00d9ff';
+            document.getElementById('currentPlayer').innerHTML = `Player ${currentTPPlayer}'s Turn`;
+            document.getElementById('currentPlayer').style.color = playerColor;
+        }
+
+        function updateTPAttempts() {
+            document.getElementById('p1Attempts').textContent = tpPlayers[1].attempts;
+            document.getElementById('p2Attempts').textContent = tpPlayers[2].attempts;
+        }
+
+        function showTPMessage(text, type) {
+            const messageContainer = document.getElementById('messageContainerTP');
+            const messageClass = `message-${type}`;
+            messageContainer.innerHTML = `<div class="message-box ${messageClass}">${text}</div>`;
+        }
+
+        function startTPTimer() {
+            tpTimerInterval = setInterval(() => {
+                const elapsed = ((Date.now() - tpStartTime) / 1000).toFixed(1);
+                document.getElementById('timerTP').textContent = elapsed;
+            }, 100);
+        }
+
+        function stopTPTimer() {
+            if (tpTimerInterval) clearInterval(tpTimerInterval);
+        }
+
+        function showTPResult(won, player, attempts, time) {
+            const content = document.getElementById('resultContent');
+            
+            if (won) {
+                content.innerHTML = `
+                    <div class="result-card">
+                        <div class="result-emoji">🎉</div>
+                        <h2>PLAYER ${player} WINS!</h2>
+                        <p>Attempts: <strong>${attempts}</strong></p>
+                        <p>Time: <strong>${time}s</strong></p>
+                        <p>Difficulty: <strong>${selectedTPDifficulty.toUpperCase()}</strong></p>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="result-card">
+                        <div class="result-emoji">🤝</div>
+                        <h2>GAME OVER</h2>
+                        <p>Time: <strong>${time}s</strong></p>
+                        <p>Neither player guessed it!</p>
+                        <p style="margin-top: 15px;">
+                            Player 1: ${tpPlayers[1].attempts} attempts<br>
+                            Player 2: ${tpPlayers[2].attempts} attempts
+                        </p>
+                    </div>
+                `;
+            }
+            
+            showScene('resultScene');
+        }
+
+        // Scores Management
+        function saveScore(difficulty, attempts, time) {
+            let scores = JSON.parse(localStorage.getItem('numberGameScores') || '{"easy":null,"medium":null,"hard":null}');
+            
+            if (!scores[difficulty] || attempts < scores[difficulty].attempts) {
+                scores[difficulty] = { attempts, time, date: new Date().toLocaleDateString() };
+                localStorage.setItem('numberGameScores', JSON.stringify(scores));
+                showMessage('🎉 NEW HIGH SCORE!', 'success');
+                updateScoresDisplay();
+            }
+        }
+
+        function loadHighScores() {
+            return JSON.parse(localStorage.getItem('numberGameScores') || '{"easy":null,"medium":null,"hard":null}');
+        }
+
+        function showScores() {
+            updateScoresDisplay();
+            showScene('scoresScene');
+        }
+
+        function updateScoresDisplay() {
+            const scores = loadHighScores();
+            
+            // High Scores
+            document.getElementById('easyHigh').textContent = scores.easy ? 
+                `${scores.easy.attempts} attempts (${scores.easy.time}s)` : '-';
+            document.getElementById('mediumHigh').textContent = scores.medium ? 
+                `${scores.medium.attempts} attempts (${scores.medium.time}s)` : '-';
+            document.getElementById('hardHigh').textContent = scores.hard ? 
+                `${scores.hard.attempts} attempts (${scores.hard.time}s)` : '-';
+            
+            // Session Scores
+            const sessionContainer = document.getElementById('sessionScores');
+            if (sessionScores.length > 0) {
+                sessionContainer.innerHTML = sessionScores.map((s, i) => `
+                    <div class="score-item">
+                        <span>${i + 1}. ${s.difficulty.toUpperCase()}</span>
+                        <span>${s.attempts} attempts (${s.time}s)</span>
+                    </div>
+                `).join('');
+            } else {
+                sessionContainer.innerHTML = '<div class="no-scores">No scores yet this session</div>';
+            }
+        }
+
+        function clearScores() {
+            if (confirm('Are you sure you want to clear all high scores?')) {
+                localStorage.setItem('numberGameScores', JSON.stringify({"easy":null,"medium":null,"hard":null}));
+                updateScoresDisplay();
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
